@@ -138,7 +138,7 @@ function atualizarResumo() {
 
   if (!plano) {
     ["r-plano", "r-duracao", "r-inicio", "r-fim", "r-venc"].forEach((id) => set(id, "—"));
-    set("r-valor", moeda(0));
+    set("r-valor", "—");
     return;
   }
 
@@ -265,3 +265,154 @@ document.getElementById("limpar").addEventListener("click", () => {
 
 atualizarResumo();
 renderizarLista();
+
+// ===== Navegação entre telas =====
+const TELAS = {
+  recepcao: "view-recepcao",
+  aluno: "view-aluno",
+  professor: "view-professor",
+};
+
+document.querySelectorAll(".nav-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const alvo = btn.dataset.view;
+    Object.entries(TELAS).forEach(([chave, id]) => {
+      document.getElementById(id).hidden = chave !== alvo;
+    });
+    document.querySelectorAll(".nav-btn").forEach((b) => b.classList.toggle("ativo", b === btn));
+    document.getElementById("side-resumo").hidden = alvo !== "recepcao";
+    if (alvo === "professor") renderizarExercicios();
+  });
+});
+
+// Cria uma <td> com texto (textContent evita injeção de HTML)
+function criarCelula(texto) {
+  const td = document.createElement("td");
+  td.textContent = texto;
+  return td;
+}
+
+function criarTag(texto, classeExtra) {
+  const td = document.createElement("td");
+  const span = document.createElement("span");
+  span.className = classeExtra ? `tag ${classeExtra}` : "tag";
+  span.textContent = texto;
+  td.appendChild(span);
+  return td;
+}
+
+// ===== US 2: Aluno consulta histórico de pagamentos =====
+const formConsulta = document.getElementById("form-consulta");
+const inputCpfConsulta = document.getElementById("cpf-consulta");
+const consultaAviso = document.getElementById("consulta-aviso");
+const consultaResultado = document.getElementById("consulta-resultado");
+
+inputCpfConsulta.addEventListener("input", (e) => {
+  const d = e.target.value.replace(/\D/g, "").slice(0, 11);
+  e.target.value = d
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+});
+
+function mostrarAviso(texto, classe) {
+  consultaAviso.textContent = texto;
+  consultaAviso.className = `banner ${classe}`;
+  consultaAviso.hidden = false;
+}
+
+formConsulta.addEventListener("submit", (e) => {
+  e.preventDefault();
+  consultaAviso.hidden = true;
+  consultaResultado.hidden = true;
+
+  const cpf = inputCpfConsulta.value.replace(/\D/g, "");
+  if (!cpfValido(cpf)) {
+    mostrarAviso("CPF inválido.", "banner-erro");
+    return;
+  }
+
+  const aluno = lerTabela(CHAVES.alunos).find((a) => a.CPF === cpf);
+  if (!aluno) {
+    mostrarAviso("Nenhum aluno encontrado com esse CPF.", "banner-erro");
+    return;
+  }
+
+  const hoje = formatarData(new Date());
+  const pagamentos = lerTabela(CHAVES.pagamentos)
+    .filter((p) => p.IDAluno === aluno.IDAluno)
+    .sort((a, b) => b.Vencimento.localeCompare(a.Vencimento));
+
+  const corpo = document.getElementById("consulta-tabela");
+  corpo.innerHTML = "";
+
+  let pendencias = 0;
+  pagamentos.forEach((p) => {
+    const atrasado = p.Status === "Pendente" && p.Vencimento < hoje;
+    if (p.Status !== "Pago") pendencias++;
+
+    const tr = document.createElement("tr");
+    tr.appendChild(criarCelula(PLANOS[p.IDPlano] ? PLANOS[p.IDPlano].Nome : "—"));
+    tr.appendChild(criarCelula(moeda(p.Valor)));
+    tr.appendChild(criarCelula(dataBR(p.Vencimento)));
+    tr.appendChild(
+      criarTag(atrasado ? "Atrasado" : p.Status, atrasado ? "tag-atrasado" : p.Status === "Pago" ? "tag-pago" : "")
+    );
+    corpo.appendChild(tr);
+  });
+
+  document.getElementById("consulta-nome").textContent = `Olá, ${aluno.Nome}`;
+  consultaResultado.hidden = false;
+
+  if (pendencias > 0) {
+    mostrarAviso(
+      `Você tem ${pendencias} pendência${pendencias > 1 ? "s" : ""} ativa${pendencias > 1 ? "s" : ""}.`,
+      "banner-aviso"
+    );
+  } else {
+    mostrarAviso("Tudo certo! Você não tem pendências.", "banner-ok");
+  }
+});
+
+// ===== US 3: Professor lista exercícios por grupo muscular =====
+const EXERCICIOS = [
+  { Nome: "Supino reto",            Grupo: "Peito",   Equipamento: "Barra",      Sugestao: "4 x 8-12" },
+  { Nome: "Supino inclinado",       Grupo: "Peito",   Equipamento: "Halteres",   Sugestao: "3 x 10-12" },
+  { Nome: "Crucifixo",              Grupo: "Peito",   Equipamento: "Halteres",   Sugestao: "3 x 12" },
+  { Nome: "Puxada frontal",         Grupo: "Costas",  Equipamento: "Polia",      Sugestao: "4 x 10" },
+  { Nome: "Remada curvada",         Grupo: "Costas",  Equipamento: "Barra",      Sugestao: "4 x 8-10" },
+  { Nome: "Remada baixa",           Grupo: "Costas",  Equipamento: "Polia",      Sugestao: "3 x 12" },
+  { Nome: "Desenvolvimento",        Grupo: "Ombros",  Equipamento: "Halteres",   Sugestao: "4 x 8-10" },
+  { Nome: "Elevação lateral",       Grupo: "Ombros",  Equipamento: "Halteres",   Sugestao: "3 x 12-15" },
+  { Nome: "Rosca direta",           Grupo: "Bíceps",  Equipamento: "Barra W",    Sugestao: "3 x 10-12" },
+  { Nome: "Rosca martelo",          Grupo: "Bíceps",  Equipamento: "Halteres",   Sugestao: "3 x 12" },
+  { Nome: "Tríceps pulley",         Grupo: "Tríceps", Equipamento: "Polia",      Sugestao: "3 x 12" },
+  { Nome: "Tríceps testa",          Grupo: "Tríceps", Equipamento: "Barra W",    Sugestao: "3 x 10" },
+  { Nome: "Agachamento livre",      Grupo: "Pernas",  Equipamento: "Barra",      Sugestao: "4 x 8-10" },
+  { Nome: "Leg press 45°",          Grupo: "Pernas",  Equipamento: "Máquina",    Sugestao: "4 x 12" },
+  { Nome: "Cadeira extensora",      Grupo: "Pernas",  Equipamento: "Máquina",    Sugestao: "3 x 12-15" },
+  { Nome: "Abdominal supra",        Grupo: "Abdômen", Equipamento: "Colchonete", Sugestao: "3 x 20" },
+  { Nome: "Prancha",                Grupo: "Abdômen", Equipamento: "Colchonete", Sugestao: "3 x 40 s" },
+];
+
+function renderizarExercicios() {
+  const grupo = document.getElementById("grupo").value;
+  const lista = grupo ? EXERCICIOS.filter((x) => x.Grupo === grupo) : EXERCICIOS;
+  const corpo = document.getElementById("grupo-tabela");
+
+  corpo.innerHTML = "";
+  lista.forEach((x) => {
+    const tr = document.createElement("tr");
+    tr.appendChild(criarCelula(x.Nome));
+    tr.appendChild(criarTag(x.Grupo, "tag-grupo"));
+    tr.appendChild(criarCelula(x.Equipamento));
+    tr.appendChild(criarCelula(x.Sugestao));
+    corpo.appendChild(tr);
+  });
+
+  document.getElementById("grupo-contagem").textContent =
+    `${lista.length} exercício${lista.length !== 1 ? "s" : ""}`;
+}
+
+document.getElementById("grupo").addEventListener("change", renderizarExercicios);
+renderizarExercicios();

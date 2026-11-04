@@ -231,3 +231,116 @@ tr:last-child td { border-bottom: none; }
   .grid { grid-template-columns: 1fr; }
   .bloco { padding: 18px; }
 }
+
+/* ---------- Navegação entre telas ---------- */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: -16px;
+}
+
+.nav-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 11px 14px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: #cbd5e1;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-btn small {
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.nav-btn.ativo {
+  background: rgba(163, 230, 53, 0.12);
+  border-color: rgba(163, 230, 53, 0.35);
+  color: var(--accent);
+}
+
+.nav-btn.ativo small {
+  color: #bef264;
+}
+
+.view[hidden],
+.side-body[hidden] {
+  display: none;
+}
+
+/* ---------- Consulta do aluno / exercícios ---------- */
+.linha {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-inline {
+  width: auto;
+  margin: 0;
+  padding: 12px 26px;
+  white-space: nowrap;
+}
+
+.banner-aviso {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.tag-pago {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tag-atrasado {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.tag-grupo {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.contagem {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+@media (max-width: 900px) {
+  .nav {
+    margin-top: 0;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .nav-btn {
+    width: auto;
+    flex: 1 1 auto;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 560px) {
+  .linha {
+    flex-direction: column;
+  }
+
+  .btn-inline {
+    width: 100%;
+  }
+}
