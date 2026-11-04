@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctor Gym - Cadastro de Aluno</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="card">
+    <header>
+      <h1>🏋️ Doctor Gym</h1>
+      <p>Cadastro de aluno e matrícula</p>
+    </header>
+
+    <form id="form-aluno" novalidate>
+      <fieldset>
+        <legend>Dados do aluno</legend>
+
+        <label for="cpf">CPF</label>
+        <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" maxlength="14" required>
+
+        <label for="nome">Nome completo</label>
+        <input type="text" id="nome" name="nome" placeholder="Maria da Silva" required>
+
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" placeholder="maria@email.com" required>
+
+        <label for="endereco">Endereço</label>
+        <input type="text" id="endereco" name="endereco" placeholder="Rua, número, bairro, cidade" required>
+      </fieldset>
+
+      <fieldset>
+        <legend>Plano</legend>
+
+        <label for="plano">Plano contratado</label>
+        <select id="plano" name="plano" required>
+          <option value="">Selecione um plano...</option>
+          <option value="1">Mensal - R$ 100,00</option>
+          <option value="2">Trimestral - R$ 250,00</option>
+          <option value="3">Semestral - R$ 450,00</option>
+          <option value="4">Anual - R$ 800,00</option>
+        </select>
+      </fieldset>
+
+      <p id="erro" class="erro" role="alert" hidden></p>
+
+      <button type="submit">Cadastrar e gerar matrícula</button>
+    </form>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
