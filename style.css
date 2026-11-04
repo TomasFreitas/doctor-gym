@@ -37,6 +37,7 @@ body {
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -343,4 +344,226 @@ tr:last-child td { border-bottom: none; }
   .btn-inline {
     width: 100%;
   }
+}
+
+.campo-forma {
+  margin-top: 16px;
+}
+
+/* ---------- Login ---------- */
+.login {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  background: linear-gradient(160deg, var(--dark), var(--dark-2));
+}
+
+.login[hidden],
+.app[hidden],
+.nav-btn[hidden] {
+  display: none;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 32px 28px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+.brand-login {
+  margin-bottom: 24px;
+}
+
+.brand-login strong {
+  color: var(--ink);
+}
+
+.brand-login small {
+  color: var(--muted);
+}
+
+.login-card h1 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.login-sub {
+  color: var(--muted);
+  margin: 2px 0 18px;
+}
+
+.perfis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 5px;
+  background: #f1f5f9;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.perfil {
+  padding: 10px 6px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.perfil:hover {
+  color: var(--ink);
+}
+
+.perfil.ativo {
+  background: var(--dark);
+  color: var(--accent);
+}
+
+#form-login .btn {
+  margin: 22px 0 0;
+}
+
+#form-login .banner {
+  margin: 16px 0 0;
+}
+
+.campo-senha {
+  margin-top: 14px;
+}
+
+.login-dica {
+  margin-top: 18px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+.login-dica code {
+  background: #f1f5f9;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--ink);
+}
+
+/* ---------- Usuário logado (lateral) ---------- */
+.usuario {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -16px 0 -16px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.usuario strong {
+  display: block;
+  color: #fff;
+  font-size: 0.92rem;
+}
+
+.usuario small {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.sair {
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.sair:hover {
+  color: #fff;
+  border-color: var(--danger);
+  background: rgba(220, 38, 38, 0.15);
+}
+
+/* ---------- Montagem de treino ---------- */
+.btn-mini {
+  padding: 5px 12px;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-mini:hover {
+  background: #bef264;
+}
+
+.btn-mini.perigo {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.btn-mini.perigo:hover {
+  background: #fecaca;
+}
+
+.ficha {
+  margin-top: 18px;
+}
+
+.ficha input {
+  padding: 7px 10px;
+  max-width: 150px;
+}
+
+.btn-treino {
+  margin: 18px 0 0;
+}
+
+td.quebra {
+  white-space: normal;
+  min-width: 220px;
+}
+
+#form-treino .banner,
+.bloco > .banner {
+  margin-bottom: 16px;
+}
+
+/* ---------- Treino do aluno ---------- */
+.treino-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-top: 14px;
+}
+
+.treino-card h4 {
+  font-size: 1rem;
+}
+
+.treino-card small {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+}
+
+#meus-treinos-lista:empty {
+  display: none;
 }

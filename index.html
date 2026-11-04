@@ -10,7 +10,54 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="app">
+  <!-- Tela de login (escolha de perfil) -->
+  <div class="login" id="tela-login">
+    <div class="login-card">
+      <div class="brand brand-login">
+        <span class="brand-icon">+</span>
+        <div>
+          <strong>Doctor Gym</strong>
+          <small>Gestão de academias</small>
+        </div>
+      </div>
+
+      <h1>Entrar</h1>
+      <p class="login-sub">Quem está acessando?</p>
+
+      <div class="perfis" role="group" aria-label="Perfil de acesso">
+        <button type="button" class="perfil ativo" data-perfil="aluno">Aluno</button>
+        <button type="button" class="perfil" data-perfil="professor">Professor</button>
+        <button type="button" class="perfil" data-perfil="recepcao">Recepcionista</button>
+      </div>
+
+      <form id="form-login" novalidate>
+        <div class="campo" id="campo-cpf">
+          <label for="login-cpf">CPF</label>
+          <input type="text" id="login-cpf" placeholder="000.000.000-00"
+                 maxlength="14" inputmode="numeric" autocomplete="off">
+        </div>
+
+        <div id="campos-staff" hidden>
+          <div class="campo">
+            <label for="login-usuario">Usuário</label>
+            <input type="text" id="login-usuario" autocomplete="username">
+          </div>
+          <div class="campo campo-senha">
+            <label for="login-senha">Senha</label>
+            <input type="password" id="login-senha" autocomplete="current-password">
+          </div>
+        </div>
+
+        <div id="login-erro" class="banner banner-erro" role="alert" hidden></div>
+
+        <button type="submit" class="btn">Entrar</button>
+      </form>
+
+      <p class="login-dica" id="login-dica"></p>
+    </div>
+  </div>
+
+  <div class="app" id="app" hidden>
 
     <!-- Painel lateral: marca + resumo ao vivo -->
     <aside class="side">
@@ -18,14 +65,23 @@
         <span class="brand-icon">+</span>
         <div>
           <strong>Doctor Gym</strong>
-          <small>Painel da recepção</small>
+          <small id="brand-sub">Painel da recepção</small>
         </div>
       </div>
 
+      <div class="usuario">
+        <div>
+          <strong id="usuario-nome">—</strong>
+          <small id="usuario-perfil">—</small>
+        </div>
+        <button type="button" id="sair" class="sair">Sair</button>
+      </div>
+
       <nav class="nav" aria-label="Telas do sistema">
-        <button type="button" class="nav-btn ativo" data-view="recepcao">Recepção <small>Matrícula</small></button>
-        <button type="button" class="nav-btn" data-view="aluno">Aluno <small>Pagamentos</small></button>
-        <button type="button" class="nav-btn" data-view="professor">Professor <small>Exercícios</small></button>
+        <button type="button" class="nav-btn ativo" data-perfil="recepcao" data-view="recepcao">Recepção <small>Matrícula</small></button>
+        <button type="button" class="nav-btn" data-perfil="aluno" data-view="aluno-treinos">Treinos <small>Minha ficha</small></button>
+        <button type="button" class="nav-btn" data-perfil="aluno" data-view="aluno-faturas">Faturas <small>Pagamentos</small></button>
+        <button type="button" class="nav-btn" data-perfil="professor" data-view="professor">Professor <small>Exercícios</small></button>
       </nav>
 
       <div class="side-body" id="side-resumo">
@@ -35,13 +91,15 @@
         <dl class="resumo" id="resumo">
           <div><dt>Plano</dt><dd id="r-plano">—</dd></div>
           <div><dt>Duração</dt><dd id="r-duracao">—</dd></div>
+          <div><dt>Total do plano</dt><dd id="r-total">—</dd></div>
+          <div><dt>Pagamento</dt><dd id="r-parcelas">—</dd></div>
           <div><dt>Início</dt><dd id="r-inicio">—</dd></div>
           <div><dt>Término</dt><dd id="r-fim">—</dd></div>
           <div><dt>1º vencimento</dt><dd id="r-venc">—</dd></div>
         </dl>
 
         <div class="total">
-          <span>Valor do 1º pagamento</span>
+          <span>Valor da 1ª parcela</span>
           <strong id="r-valor">—</strong>
         </div>
       </div>
@@ -95,6 +153,14 @@
               <option value="4">Anual - R$ 800,00</option>
             </select>
           </div>
+
+          <div class="campo campo-forma">
+            <label for="forma">Forma de pagamento</label>
+            <select id="forma" name="forma">
+              <option value="parcelado">Parcelado (uma parcela por mês)</option>
+              <option value="avista">À vista (pagamento único)</option>
+            </select>
+          </div>
         </section>
 
         <button type="submit" class="btn">Cadastrar e gerar matrícula</button>
@@ -117,14 +183,27 @@
       </section>
       </div>
 
-      <!-- US 2: Aluno consulta histórico de pagamentos -->
-      <div class="view" id="view-aluno" hidden>
+      <!-- Aluno: aba Treinos -->
+      <div class="view" id="view-aluno-treinos" hidden>
         <header class="page-head">
-          <h1>Meus pagamentos</h1>
-          <p>Informe seu CPF para consultar o histórico de pagamentos e saber se há alguma pendência ativa.</p>
+          <h1>Meus treinos</h1>
+          <p>Treinos atribuídos pelo seu professor.</p>
         </header>
 
-        <form id="form-consulta" class="bloco" novalidate>
+        <section class="bloco" id="meus-treinos">
+          <div id="meus-treinos-lista"></div>
+          <p id="meus-treinos-vazio" class="vazio">Você ainda não tem treino atribuído. Fale com o professor.</p>
+        </section>
+      </div>
+
+      <!-- Aluno: aba Faturas (US 2: histórico de pagamentos) -->
+      <div class="view" id="view-aluno-faturas" hidden>
+        <header class="page-head">
+          <h1>Minhas faturas</h1>
+          <p>Histórico dos seus pagamentos e pendências ativas.</p>
+        </header>
+
+        <form id="form-consulta" class="bloco" novalidate hidden>
           <div class="campo">
             <label for="cpf-consulta">CPF</label>
             <div class="linha">
@@ -142,7 +221,7 @@
           <div class="tabela-wrap">
             <table>
               <thead>
-                <tr><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr>
+                <tr><th>Plano</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr>
               </thead>
               <tbody id="consulta-tabela"></tbody>
             </table>
@@ -181,11 +260,101 @@
           <div class="tabela-wrap">
             <table>
               <thead>
-                <tr><th>Exercício</th><th>Grupo</th><th>Equipamento</th><th>Sugestão</th></tr>
+                <tr><th>Exercício</th><th>Grupo</th><th>Equipamento</th><th>Sugestão</th><th></th></tr>
               </thead>
               <tbody id="grupo-tabela"></tbody>
             </table>
           </div>
+        </section>
+
+        <!-- 1) Criar treino (modelo reutilizável) -->
+        <section class="bloco">
+          <h3><span class="num">1</span> Criar treino</h3>
+
+          <div id="treino-sucesso" class="banner banner-ok" role="status" hidden></div>
+          <div id="treino-erro" class="banner banner-erro" role="alert" hidden></div>
+
+          <form id="form-treino" novalidate>
+            <div class="campo">
+              <label for="treino-nome">Nome do treino</label>
+              <input type="text" id="treino-nome" placeholder="Treino A - Peito e Tríceps" autocomplete="off">
+            </div>
+
+            <div class="tabela-wrap ficha">
+              <table>
+                <thead>
+                  <tr><th>Exercício</th><th>Grupo</th><th>Séries x repetições</th><th></th></tr>
+                </thead>
+                <tbody id="treino-itens"></tbody>
+              </table>
+            </div>
+            <p id="treino-vazio" class="vazio">Clique em "Adicionar" nos exercícios acima para montar o treino.</p>
+
+            <div class="campo campo-forma">
+              <label for="treino-aluno">Atribuir a um aluno agora (opcional)</label>
+              <select id="treino-aluno">
+                <option value="">Não atribuir agora</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-treino">Criar treino</button>
+          </form>
+        </section>
+
+        <!-- 2) Atribuir treino a um aluno -->
+        <section class="bloco">
+          <h3><span class="num">2</span> Atribuir treino ao aluno</h3>
+
+          <div id="atrib-sucesso" class="banner banner-ok" role="status" hidden></div>
+          <div id="atrib-erro" class="banner banner-erro" role="alert" hidden></div>
+
+          <form id="form-atribuir" novalidate>
+            <div class="grid">
+              <div class="campo">
+                <label for="atrib-treino">Treino</label>
+                <select id="atrib-treino">
+                  <option value="">Selecione o treino...</option>
+                </select>
+              </div>
+              <div class="campo">
+                <label for="atrib-aluno">Aluno</label>
+                <select id="atrib-aluno">
+                  <option value="">Selecione o aluno...</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-treino">Atribuir treino</button>
+          </form>
+        </section>
+
+        <section class="bloco">
+          <div class="lista-head">
+            <h3>Treinos criados</h3>
+          </div>
+          <div class="tabela-wrap">
+            <table>
+              <thead>
+                <tr><th>Treino</th><th>Exercícios</th><th>Criado em</th></tr>
+              </thead>
+              <tbody id="treinos-tabela"></tbody>
+            </table>
+          </div>
+          <p id="treinos-vazio" class="vazio">Nenhum treino criado ainda.</p>
+        </section>
+
+        <section class="bloco">
+          <div class="lista-head">
+            <h3>Treinos atribuídos</h3>
+          </div>
+          <div class="tabela-wrap">
+            <table>
+              <thead>
+                <tr><th>Aluno</th><th>Treino</th><th>Atribuído em</th></tr>
+              </thead>
+              <tbody id="atribuidos-tabela"></tbody>
+            </table>
+          </div>
+          <p id="atribuidos-vazio" class="vazio">Nenhum treino atribuído ainda.</p>
         </section>
       </div>
     </main>
