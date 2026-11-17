@@ -2051,3 +2051,278 @@ tr.linha-aluno.selecionado:hover > td {
   background: #ecfccb;
   color: #3f6212;
 }
+
+/* =====================================================================
+   Pagamento Pix (simulação)
+   ===================================================================== */
+.btn-pagar {
+  min-width: 70px;
+}
+
+.btn-pagar.atrasado {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn-pagar.atrasado:hover {
+  background: #b91c1c;
+}
+
+.pix-caixa {
+  position: relative;
+  max-width: 440px;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  text-align: center;
+  padding: 28px 26px 22px;
+}
+
+.pix-fechar {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  font: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.pix-fechar:hover {
+  background: #f1f5f9;
+  color: var(--ink);
+}
+
+.pix-selo {
+  display: inline-block;
+  padding: 4px 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0f766e;
+  background: #ccfbf1;
+  border-radius: 999px;
+}
+
+.pix-caixa h2 {
+  margin-top: 10px;
+  font-size: 1.05rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.pix-valor {
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink) !important;
+  margin-top: 0 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.pix-sub {
+  font-size: 0.85rem;
+  margin-top: 2px !important;
+}
+
+.pix-sub.atrasado {
+  color: var(--danger) !important;
+  font-weight: 600;
+}
+
+.pix-qr {
+  width: 196px;
+  height: 196px;
+  margin: 18px auto 12px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.pix-qr svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.pix-instrucao {
+  font-size: 0.84rem !important;
+  max-width: 34ch;
+  margin: 0 auto 16px !important;
+}
+
+.pix-label {
+  display: block;
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.pix-copia {
+  display: flex;
+  gap: 8px;
+}
+
+.pix-copia input {
+  padding: 9px 10px;
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.74rem;
+  color: var(--muted);
+  background: #f8fafc;
+}
+
+.pix-copia .btn-sec {
+  white-space: nowrap;
+}
+
+.pix-info {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 0.8fr;
+  gap: 10px;
+  margin: 16px 0 14px;
+  padding: 12px;
+  text-align: left;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.pix-info dt {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.pix-info dd {
+  font-size: 0.8rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.pix-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #cbd5e1;
+  border-top-color: #0f766e;
+  border-radius: 50%;
+  animation: girar 0.9s linear infinite;
+}
+
+.pix-status.processando {
+  color: #0f766e;
+  font-weight: 600;
+}
+
+.pix-status.processando .spinner {
+  border-top-color: var(--accent);
+  border-color: rgba(163, 230, 53, 0.3);
+  border-top-color: #65a30d;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+.pix-simular {
+  margin: 0;
+}
+
+.pix-aviso {
+  margin-top: 10px !important;
+  font-size: 0.74rem !important;
+}
+
+/* Etapa de confirmação */
+.pix-ok {
+  padding-top: 6px;
+}
+
+.pix-ok[hidden],
+#pix-etapa-pagar[hidden] {
+  display: none;
+}
+
+.pix-check {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 10px 30px rgba(132, 204, 22, 0.4);
+  animation: pulsar 0.4s ease-out;
+}
+
+.pix-ok h2 {
+  font-size: 1.35rem !important;
+  color: var(--ink) !important;
+  font-weight: 800 !important;
+}
+
+.pix-ok .btn {
+  margin: 4px 0 0;
+}
+
+@keyframes pulsar {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@media (max-width: 480px) {
+  .pix-info {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pix-info div:first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Pix: vence a regra genérica ".modal-caixa p" */
+.pix-caixa .pix-valor {
+  font-size: 2.4rem;
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+.pix-caixa .pix-sub {
+  font-size: 0.85rem;
+}
+
+.pix-caixa .pix-instrucao {
+  font-size: 0.84rem;
+}
+
+.pix-caixa .pix-aviso {
+  font-size: 0.74rem;
+}
+
+.pix-caixa h2 {
+  margin-top: 12px;
+}

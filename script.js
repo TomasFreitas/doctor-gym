@@ -646,6 +646,16 @@ formConsulta.addEventListener("submit", (e) => {
     tr.appendChild(criarCelula(moeda(p.Valor)));
     tr.appendChild(criarCelula(dataBR(p.Vencimento)));
     tr.appendChild(criarTag(rotulo.texto, rotulo.classe));
+    const tdPagar = document.createElement("td");
+    if (p.Status === "Pendente") {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = atrasado ? "btn-mini btn-pagar atrasado" : "btn-mini btn-pagar";
+      btn.textContent = "Pagar";
+      btn.addEventListener("click", () => abrirPix(p.IDPagamento));
+      tdPagar.appendChild(btn);
+    }
+    tr.appendChild(tdPagar);
     corpo.appendChild(tr);
   });
 
@@ -675,6 +685,181 @@ formConsulta.addEventListener("submit", (e) => {
   } else {
     mostrarAviso("Tudo certo! Você não tem pendências.", "banner-ok");
   }
+});
+
+
+// ===== Pagamento Pix (simulação) =====
+// Gera um "Pix copia e cola" no formato BR Code (EMV + CRC16) com chave fictícia,
+// desenha um QR ilustrativo e, ao simular, marca a parcela como paga.
+const CHAVE_PIX_DEMO = "7f3c2a9e-1b4d-4c8a-9e21-5d6f0a8b3c47"; // chave aleatória fictícia
+const modalPix = document.getElementById("modal-pix");
+let pixAtual = null;   // { idPagamento, txid }
+let pixTimer = null;
+
+function campoEMV(id, valor) {
+  return id + String(valor.length).padStart(2, "0") + valor;
+}
+
+// CRC16-CCITT (polinômio 0x1021, inicial 0xFFFF), usado no BR Code do Pix
+function crc16(texto) {
+  let crc = 0xffff;
+  for (let i = 0; i < texto.length; i++) {
+    crc ^= texto.charCodeAt(i) << 8;
+    for (let b = 0; b < 8; b++) {
+      crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+    }
+  }
+  return crc.toString(16).toUpperCase().padStart(4, "0");
+}
+
+function gerarPixCopiaECola(valor, txid) {
+  const conta = campoEMV("00", "br.gov.bcb.pix") + campoEMV("01", CHAVE_PIX_DEMO);
+  const semCrc =
+    campoEMV("00", "01") +
+    campoEMV("26", conta) +
+    campoEMV("52", "0000") +
+    campoEMV("53", "986") +
+    campoEMV("54", valor.toFixed(2)) +
+    campoEMV("58", "BR") +
+    campoEMV("59", "DOCTOR GYM") +
+    campoEMV("60", "SAO PAULO") +
+    campoEMV("62", campoEMV("05", txid)) +
+    "6304";
+  return semCrc + crc16(semCrc);
+}
+
+// QR ilustrativo: padrões de canto reais + módulos derivados do código (não é escaneável)
+function desenharQR(texto) {
+  const n = 29;
+  let semente = 0;
+  for (const c of texto) semente = (semente * 31 + c.charCodeAt(0)) >>> 0;
+  const aleatorio = () => {
+    semente ^= semente << 13; semente >>>= 0;
+    semente ^= semente >>> 17;
+    semente ^= semente << 5; semente >>>= 0;
+    return semente / 4294967296;
+  };
+  const noCanto = (x, y) => (x < 8 && y < 8) || (x > n - 9 && y < 8) || (x < 8 && y > n - 9);
+  let rects = "";
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      if (!noCanto(x, y) && aleatorio() > 0.52) rects += `<rect x="${x}" y="${y}" width="1" height="1"/>`;
+    }
+  }
+  const olho = (x, y) =>
+    `<rect x="${x}" y="${y}" width="7" height="7"/><rect x="${x + 1}" y="${y + 1}" width="5" height="5" fill="#fff"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3"/>`;
+  return `<svg viewBox="-2 -2 ${n + 4} ${n + 4}" shape-rendering="crispEdges" aria-hidden="true"><rect x="-2" y="-2" width="${n + 4}" height="${n + 4}" fill="#fff"/><g fill="#0b1220">${rects}${olho(0, 0)}${olho(n - 7, 0)}${olho(0, n - 7)}</g></svg>`;
+}
+
+function abrirPix(idPagamento) {
+  const p = lerTabela(CHAVES.pagamentos).find((x) => x.IDPagamento === idPagamento);
+  if (!p || p.Status !== "Pendente") return;
+  const hoje = formatarData(new Date());
+  const txid = `DG${String(p.IDPagamento).slice(-8)}${Date.now().toString(36).toUpperCase()}`.slice(0, 25);
+  const codigo = gerarPixCopiaECola(p.Valor, txid);
+  pixAtual = { idPagamento, txid };
+
+  const parcela = p.TotalParcelas > 1 ? `parcela ${p.NumeroParcela}/${p.TotalParcelas}` : "pagamento único";
+  document.getElementById("pix-titulo").textContent = `Pagar ${parcela}`;
+  document.getElementById("pix-valor").textContent = moeda(p.Valor);
+  document.getElementById("pix-sub").textContent =
+    `${PLANOS[p.IDPlano]?.Nome ?? "Plano"} · vencimento ${dataBR(p.Vencimento)}` +
+    (p.Vencimento < hoje ? " · em atraso" : "");
+  document.getElementById("pix-sub").classList.toggle("atrasado", p.Vencimento < hoje);
+  document.getElementById("pix-qr").innerHTML = desenharQR(codigo); // SVG gerado aqui, sem dado do usuário
+  document.getElementById("pix-codigo").value = codigo;
+  document.getElementById("pix-chave").textContent = CHAVE_PIX_DEMO;
+  document.getElementById("pix-copiar").textContent = "Copiar";
+  document.getElementById("pix-status").classList.remove("processando");
+  document.getElementById("pix-status-texto").textContent = "Aguardando pagamento…";
+  document.getElementById("pix-simular").disabled = false;
+  document.getElementById("pix-etapa-pagar").hidden = false;
+  document.getElementById("pix-etapa-ok").hidden = true;
+
+  // Contagem regressiva de 15 minutos (só visual)
+  let restante = 15 * 60;
+  const timerEl = document.getElementById("pix-timer");
+  const pintar = () => {
+    timerEl.textContent = `${String(Math.floor(restante / 60)).padStart(2, "0")}:${String(restante % 60).padStart(2, "0")}`;
+  };
+  pintar();
+  clearInterval(pixTimer);
+  pixTimer = setInterval(() => {
+    restante = Math.max(0, restante - 1);
+    pintar();
+  }, 1000);
+
+  modalPix.hidden = false;
+  document.getElementById("pix-copiar").focus();
+}
+
+function fecharPix() {
+  clearInterval(pixTimer);
+  modalPix.hidden = true;
+  pixAtual = null;
+}
+
+function confirmarPagamentoPix() {
+  if (!pixAtual) return null;
+  const pagamentos = lerTabela(CHAVES.pagamentos);
+  const p = pagamentos.find((x) => x.IDPagamento === pixAtual.idPagamento);
+  if (!p || p.Status !== "Pendente") return null;
+  p.Status = "Pago";
+  p.DataPagamento = formatarData(new Date());
+  p.FormaPagamento = "Pix";
+  p.IDTransacao = pixAtual.txid;
+  salvarTabela(CHAVES.pagamentos, pagamentos);
+  console.log("Pagamento Pix simulado (JSON):");
+  console.log(JSON.stringify(p, null, 2));
+  return p;
+}
+
+document.getElementById("pix-copiar").addEventListener("click", async () => {
+  const input = document.getElementById("pix-codigo");
+  const btn = document.getElementById("pix-copiar");
+  try {
+    await navigator.clipboard.writeText(input.value);
+  } catch {
+    input.select(); // sem permissão de área de transferência: deixa selecionado para Ctrl+C
+  }
+  btn.textContent = "Copiado!";
+  setTimeout(() => (btn.textContent = "Copiar"), 1800);
+});
+
+document.getElementById("pix-simular").addEventListener("click", () => {
+  const btn = document.getElementById("pix-simular");
+  btn.disabled = true;
+  document.getElementById("pix-status").classList.add("processando");
+  document.getElementById("pix-status-texto").textContent = "Processando pagamento…";
+
+  setTimeout(() => {
+    const p = confirmarPagamentoPix();
+    if (!p) {
+      fecharPix();
+      return;
+    }
+    clearInterval(pixTimer);
+    const parcela = p.TotalParcelas > 1 ? `Parcela ${p.NumeroParcela}/${p.TotalParcelas}` : "Pagamento único";
+    document.getElementById("pix-ok-texto").textContent = `${parcela} de ${moeda(p.Valor)} paga com sucesso.`;
+    document.getElementById("pix-ok-data").textContent = dataBR(p.DataPagamento);
+    document.getElementById("pix-ok-id").textContent = p.IDTransacao;
+    document.getElementById("pix-etapa-pagar").hidden = true;
+    document.getElementById("pix-etapa-ok").hidden = false;
+    document.getElementById("pix-concluir").focus();
+    formConsulta.requestSubmit(); // atualiza a lista e o resumo das faturas
+  }, 1200);
+});
+
+document.getElementById("pix-concluir").addEventListener("click", () => {
+  fecharPix();
+  toast("Pagamento confirmado. Obrigado!");
+});
+document.getElementById("pix-fechar").addEventListener("click", fecharPix);
+modalPix.addEventListener("click", (e) => {
+  if (e.target === modalPix) fecharPix();
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !modalPix.hidden) fecharPix();
 });
 
 // ===== US 3 / US 7: Banco de exercícios do professor =====

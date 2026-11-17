@@ -405,7 +405,7 @@
           <div class="tabela-wrap">
             <table>
               <thead>
-                <tr><th>Plano</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Status</th></tr>
+                <tr><th>Plano</th><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Status</th><th></th></tr>
               </thead>
               <tbody id="consulta-tabela"></tbody>
             </table>
@@ -610,6 +610,52 @@
       <div class="modal-acoes">
         <button type="button" class="btn-sec" id="modal-cancelar">Cancelar</button>
         <button type="button" class="btn-perigo" id="modal-ok">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagamento Pix (simulação) -->
+  <div class="modal" id="modal-pix" hidden>
+    <div class="modal-caixa pix-caixa" role="dialog" aria-modal="true" aria-labelledby="pix-titulo">
+      <button type="button" class="pix-fechar" id="pix-fechar" aria-label="Fechar">×</button>
+
+      <div id="pix-etapa-pagar">
+        <span class="pix-selo">Pix</span>
+        <h2 id="pix-titulo">Pagar parcela</h2>
+        <p class="pix-valor" id="pix-valor">—</p>
+        <p class="pix-sub" id="pix-sub"></p>
+
+        <div class="pix-qr" id="pix-qr" aria-label="QR Code ilustrativo do pagamento" role="img"></div>
+        <p class="pix-instrucao">Abra o app do seu banco, escolha <strong>Pix</strong> e escaneie o QR Code ou use o código copia e cola.</p>
+
+        <label class="pix-label" for="pix-codigo">Pix copia e cola</label>
+        <div class="pix-copia">
+          <input type="text" id="pix-codigo" readonly>
+          <button type="button" class="btn-sec" id="pix-copiar">Copiar</button>
+        </div>
+
+        <dl class="pix-info">
+          <div><dt>Chave Pix</dt><dd id="pix-chave"></dd></div>
+          <div><dt>Recebedor</dt><dd>Doctor Gym</dd></div>
+          <div><dt>Expira em</dt><dd id="pix-timer">15:00</dd></div>
+        </dl>
+
+        <div class="pix-status" id="pix-status"><span class="spinner" aria-hidden="true"></span> <span id="pix-status-texto">Aguardando pagamento…</span></div>
+
+        <button type="button" class="btn pix-simular" id="pix-simular">Simular pagamento</button>
+        <p class="pix-aviso">Ambiente de demonstração: nenhum valor é cobrado de verdade.</p>
+      </div>
+
+      <div id="pix-etapa-ok" class="pix-ok" hidden>
+        <span class="pix-check" aria-hidden="true">✓</span>
+        <h2>Pagamento confirmado!</h2>
+        <p id="pix-ok-texto"></p>
+        <dl class="pix-info">
+          <div><dt>Forma</dt><dd>Pix</dd></div>
+          <div><dt>Data</dt><dd id="pix-ok-data"></dd></div>
+          <div><dt>Transação</dt><dd id="pix-ok-id"></dd></div>
+        </dl>
+        <button type="button" class="btn" id="pix-concluir">Concluir</button>
       </div>
     </div>
   </div>
