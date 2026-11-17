@@ -3,6 +3,8 @@
 Sistema web de gestão de academia com três perfis de acesso: **Recepção**, **Professor** e **Aluno**.
 Feito em HTML, CSS e JavaScript puro, sem dependências. Os dados ficam salvos no navegador (`localStorage`).
 
+**Acesse online:** https://tomasfreitas.github.io/doctor-gym/
+
 ## Como rodar
 
 Basta abrir o `index.html` no navegador. Se preferir servir localmente:
