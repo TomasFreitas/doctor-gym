@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Doctor Gym - Cadastro de Aluno</title>
+  <title>Doctor Gym</title>
+  <meta name="theme-color" content="#0b1220">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,6 +13,29 @@
 <body>
   <!-- Tela de login (escolha de perfil) -->
   <div class="login" id="tela-login">
+    <section class="login-hero" aria-hidden="true">
+      <div class="brand">
+        <span class="brand-icon">+</span>
+        <div>
+          <strong>Doctor Gym</strong>
+          <small>Gestão de academias</small>
+        </div>
+      </div>
+
+      <div class="hero-texto">
+        <h2>Matrículas, cobranças e treinos em um só lugar.</h2>
+        <p>Cada perfil vê exatamente o que precisa: a recepção cuida das matrículas e pagamentos, o professor monta as fichas e o aluno acompanha tudo.</p>
+      </div>
+
+      <ul class="hero-lista">
+        <li><span class="hero-ico" data-ico="recepcao"></span><div><strong>Recepção</strong><small>Matrículas, baixas e inadimplência</small></div></li>
+        <li><span class="hero-ico" data-ico="treinos"></span><div><strong>Professor</strong><small>Banco de exercícios e fichas de treino</small></div></li>
+        <li><span class="hero-ico" data-ico="faturas"></span><div><strong>Aluno</strong><small>Treinos do dia e faturas</small></div></li>
+      </ul>
+
+      <small class="hero-rodape">Doctor Gym · 2026</small>
+    </section>
+
     <div class="login-card">
       <div class="brand brand-login">
         <span class="brand-icon">+</span>
@@ -54,6 +78,14 @@
       </form>
 
       <p class="login-dica" id="login-dica"></p>
+
+      <div class="demo">
+        <button type="button" id="carregar-demo" class="link">Carregar dados de exemplo</button>
+        <div id="demo-info" class="demo-info" hidden>
+          <p>Dados carregados. Entre como aluno com um destes CPFs:</p>
+          <ul id="demo-cpfs"></ul>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -70,7 +102,8 @@
       </div>
 
       <div class="usuario">
-        <div>
+        <span class="avatar avatar-lateral" id="usuario-avatar" aria-hidden="true"></span>
+        <div class="usuario-txt">
           <strong id="usuario-nome">—</strong>
           <small id="usuario-perfil">—</small>
         </div>
@@ -78,10 +111,14 @@
       </div>
 
       <nav class="nav" aria-label="Telas do sistema">
-        <button type="button" class="nav-btn ativo" data-perfil="recepcao" data-view="recepcao">Recepção <small>Matrícula</small></button>
-        <button type="button" class="nav-btn" data-perfil="aluno" data-view="aluno-treinos">Treinos <small>Minha ficha</small></button>
-        <button type="button" class="nav-btn" data-perfil="aluno" data-view="aluno-faturas">Faturas <small>Pagamentos</small></button>
-        <button type="button" class="nav-btn" data-perfil="professor" data-view="professor">Professor <small>Exercícios</small></button>
+        <button type="button" class="nav-btn ativo" data-perfil="recepcao" data-view="recepcao"><span class="nav-ico" data-ico="recepcao"></span><span class="nav-txt">Matrícula<small>Novo aluno</small></span></button>
+        <button type="button" class="nav-btn" data-perfil="recepcao" data-view="recepcao-alunos"><span class="nav-ico" data-ico="alunos"></span><span class="nav-txt">Alunos<small>Busca e baixas</small></span></button>
+        <button type="button" class="nav-btn" data-perfil="recepcao" data-view="recepcao-relatorio"><span class="nav-ico" data-ico="relatorio"></span><span class="nav-txt">Inadimplência<small>Relatório</small></span></button>
+        <button type="button" class="nav-btn" data-perfil="aluno" data-view="aluno-treinos"><span class="nav-ico" data-ico="treinos"></span><span class="nav-txt">Treinos<small>Minha ficha</small></span></button>
+        <button type="button" class="nav-btn" data-perfil="aluno" data-view="aluno-faturas"><span class="nav-ico" data-ico="faturas"></span><span class="nav-txt">Faturas<small>Pagamentos</small></span></button>
+        <button type="button" class="nav-btn" data-perfil="professor" data-view="prof-alunos"><span class="nav-ico" data-ico="alunos"></span><span class="nav-txt">Alunos<small>Atribuir treinos</small></span></button>
+        <button type="button" class="nav-btn" data-perfil="professor" data-view="prof-treinos"><span class="nav-ico" data-ico="treinos"></span><span class="nav-txt">Treinos<small>Criar e editar</small></span></button>
+        <button type="button" class="nav-btn" data-perfil="professor" data-view="prof-exercicios"><span class="nav-ico" data-ico="exercicios"></span><span class="nav-txt">Exercícios<small>Banco</small></span></button>
       </nav>
 
       <div class="side-body" id="side-resumo">
@@ -109,11 +146,39 @@
     <main class="main">
       <div class="view" id="view-recepcao">
       <header class="page-head">
-        <h1>Novo aluno</h1>
-        <p>Cadastre o aluno e vincule a um plano. A matrícula e o primeiro pagamento são gerados automaticamente.</p>
+        <h1>Matrículas</h1>
+        <p>Cadastre o aluno e vincule a um plano. A matrícula e as parcelas são geradas automaticamente.</p>
       </header>
 
       <div id="sucesso" class="banner banner-ok" role="status" hidden></div>
+
+      <!-- Destaque: ação principal da recepção -->
+      <section class="cta-matricula" id="cta-matricula">
+        <div class="cta-topo">
+          <span class="cta-ico" data-ico="recepcao"></span>
+          <div>
+            <h2>Matricular novo aluno</h2>
+            <p>Dados do aluno, plano e forma de pagamento em um só passo. As parcelas são geradas na hora.</p>
+          </div>
+        </div>
+
+        <div class="cta-planos" id="cta-planos" role="group" aria-label="Começar com um plano"></div>
+
+        <button type="button" id="btn-nova-matricula" class="btn btn-cta">Iniciar matrícula <span aria-hidden="true">→</span></button>
+      </section>
+
+      <div class="kpis kpis-mini">
+        <div class="kpi"><span>Matrículas ativas</span><strong id="ind-ativas">0</strong></div>
+        <div class="kpi"><span>Novas este mês</span><strong id="ind-novas">0</strong></div>
+        <div class="kpi" id="ind-atraso-card"><span>Alunos com atraso</span><strong id="ind-atraso">0</strong></div>
+      </div>
+
+      <div class="matricula-form" id="matricula-form-bloco" hidden>
+      <div class="lista-head matricula-head">
+        <h3>Nova matrícula</h3>
+        <button type="button" class="link" id="matricula-fechar">Cancelar</button>
+      </div>
+
       <div id="erro" class="banner banner-erro" role="alert" hidden></div>
 
       <form id="form-aluno" novalidate>
@@ -165,22 +230,135 @@
 
         <button type="submit" class="btn">Cadastrar e gerar matrícula</button>
       </form>
+      </div>
 
       <section class="bloco lista">
         <div class="lista-head">
           <h3>Últimos cadastros</h3>
-          <button type="button" id="limpar" class="link">Limpar dados</button>
+          <div class="acoes">
+            <button type="button" class="link js-carregar-demo">Carregar dados de exemplo</button>
+            <button type="button" id="limpar" class="link">Limpar dados</button>
+          </div>
         </div>
         <div class="tabela-wrap">
           <table>
             <thead>
-              <tr><th>Aluno</th><th>Plano</th><th>Matrícula até</th><th>Valor</th><th>Pagamento</th></tr>
+              <tr><th>Aluno</th><th>Plano</th><th>Matrícula até</th><th>Valor</th><th>Financeiro</th></tr>
             </thead>
             <tbody id="tabela"></tbody>
           </table>
         </div>
         <p id="vazio" class="vazio">Nenhum aluno cadastrado ainda.</p>
       </section>
+      </div>
+
+      <!-- Recepção: US5 busca, US4 baixa, US6 cancelamento -->
+      <div class="view" id="view-recepcao-alunos" hidden>
+        <header class="page-head">
+          <h1>Alunos</h1>
+          <p>Busque por nome ou CPF para ver a matrícula, dar baixa em parcelas ou cancelar a matrícula.</p>
+        </header>
+
+        <section class="bloco">
+          <div class="campo">
+            <label for="busca">Buscar aluno</label>
+            <input type="search" id="busca" placeholder="Nome ou CPF" autocomplete="off">
+          </div>
+        </section>
+
+        <section class="bloco">
+          <div class="lista-head">
+            <h3>Resultados</h3>
+            <span id="busca-contagem" class="contagem"></span>
+          </div>
+          <div class="tabela-wrap">
+            <table>
+              <thead>
+                <tr><th>Aluno</th><th>CPF</th><th>Plano</th><th>Matrícula</th><th>Financeiro</th><th></th></tr>
+              </thead>
+              <tbody id="busca-tabela"></tbody>
+            </table>
+          </div>
+          <p id="busca-vazio" class="vazio" hidden>Nenhum aluno encontrado.</p>
+          <p class="vazio" id="busca-demo" hidden>
+            <button type="button" class="btn-mini js-carregar-demo">Carregar dados de exemplo</button>
+          </p>
+        </section>
+
+        <!-- Painel de detalhe: o JS move este bloco para baixo da linha do aluno clicado -->
+        <section class="detalhe-painel" id="detalhe" hidden>
+          <div class="lista-head">
+            <h3 id="detalhe-nome"></h3>
+            <button type="button" id="detalhe-fechar" class="link">Fechar</button>
+          </div>
+
+          <div id="detalhe-sucesso" class="banner banner-ok" role="status" hidden></div>
+
+          <dl class="info" id="detalhe-info"></dl>
+
+          <div class="tabela-wrap">
+            <table>
+              <thead>
+                <tr><th>Parcela</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>Pago em</th><th></th></tr>
+              </thead>
+              <tbody id="detalhe-parcelas"></tbody>
+            </table>
+          </div>
+
+          <div class="zona-perigo" id="zona-cancelar">
+            <div>
+              <strong>Cancelar matrícula</strong>
+              <small>A matrícula passa para "Inativa" e as parcelas futuras são canceladas. Parcelas já vencidas continuam em aberto.</small>
+            </div>
+            <button type="button" id="btn-cancelar" class="btn-mini perigo">Cancelar matrícula</button>
+          </div>
+        </section>
+      </div>
+
+      <!-- Recepção: US10 relatório de faturas atrasadas -->
+      <div class="view" id="view-recepcao-relatorio" hidden>
+        <header class="page-head">
+          <h1>Faturas atrasadas</h1>
+          <p>Parcelas vencidas e não pagas no mês escolhido, para a cobrança dos inadimplentes.</p>
+        </header>
+
+        <section class="bloco">
+          <div class="linha linha-fim">
+            <div class="campo">
+              <label for="rel-mes">Mês de vencimento</label>
+              <input type="month" id="rel-mes">
+            </div>
+            <button type="button" id="rel-imprimir" class="btn btn-inline btn-claro">Imprimir</button>
+          </div>
+        </section>
+
+        <div class="kpis">
+          <div class="kpi"><span>Faturas atrasadas</span><strong id="kpi-qtd">0</strong></div>
+          <div class="kpi"><span>Valor em atraso</span><strong id="kpi-valor">R$ 0,00</strong></div>
+          <div class="kpi"><span>Alunos inadimplentes</span><strong id="kpi-alunos">0</strong></div>
+        </div>
+
+        <section class="bloco">
+          <div class="lista-head">
+            <h3>Valor em atraso por aluno</h3>
+          </div>
+          <div id="rel-barras" class="barras"></div>
+          <p id="rel-vazio" class="vazio">Nenhuma fatura atrasada neste mês.</p>
+        </section>
+
+        <section class="bloco" id="rel-detalhe">
+          <div class="lista-head">
+            <h3>Lista de cobrança</h3>
+          </div>
+          <div class="tabela-wrap">
+            <table>
+              <thead>
+                <tr><th>Aluno</th><th>CPF</th><th>E-mail</th><th>Parcelas</th><th>Valor</th><th>Maior atraso</th></tr>
+              </thead>
+              <tbody id="rel-tabela"></tbody>
+            </table>
+          </div>
+        </section>
       </div>
 
       <!-- Aluno: aba Treinos -->
@@ -216,6 +394,12 @@
 
         <div id="consulta-aviso" class="banner" hidden></div>
 
+        <div class="kpis" id="fat-resumo" hidden>
+          <div class="kpi"><span>Em aberto</span><strong id="fat-aberto">—</strong></div>
+          <div class="kpi"><span>Próximo vencimento</span><strong id="fat-proximo">—</strong></div>
+          <div class="kpi"><span>Parcelas pagas</span><strong id="fat-pagas">—</strong></div>
+        </div>
+
         <section class="bloco" id="consulta-resultado" hidden>
           <h3 id="consulta-nome"></h3>
           <div class="tabela-wrap">
@@ -229,49 +413,85 @@
         </section>
       </div>
 
-      <!-- US 3: Professor lista exercícios por grupo muscular -->
-      <div class="view" id="view-professor" hidden>
+      <!-- ===== Professor: Alunos (atribuir / inativar treinos — US9) ===== -->
+      <div class="view" id="view-prof-alunos" hidden>
         <header class="page-head">
-          <h1>Banco de exercícios</h1>
-          <p>Filtre por grupo muscular para montar as fichas de treino mais rápido.</p>
+          <h1>Alunos</h1>
+          <p>Clique em um aluno para ver os treinos dele, atribuir um novo ou inativar um antigo.</p>
         </header>
 
         <section class="bloco">
           <div class="campo">
-            <label for="grupo">Grupo muscular</label>
-            <select id="grupo">
-              <option value="">Todos os grupos</option>
-              <option value="Peito">Peito</option>
-              <option value="Costas">Costas</option>
-              <option value="Ombros">Ombros</option>
-              <option value="Bíceps">Bíceps</option>
-              <option value="Tríceps">Tríceps</option>
-              <option value="Pernas">Pernas</option>
-              <option value="Abdômen">Abdômen</option>
-            </select>
+            <label for="prof-busca">Buscar aluno</label>
+            <input type="search" id="prof-busca" placeholder="Nome ou CPF" autocomplete="off">
           </div>
         </section>
 
         <section class="bloco">
           <div class="lista-head">
-            <h3>Exercícios</h3>
-            <span id="grupo-contagem" class="contagem"></span>
+            <h3>Alunos</h3>
+            <span id="prof-contagem" class="contagem"></span>
           </div>
           <div class="tabela-wrap">
             <table>
               <thead>
-                <tr><th>Exercício</th><th>Grupo</th><th>Equipamento</th><th>Sugestão</th><th></th></tr>
+                <tr><th>Aluno</th><th>Matrícula</th><th>Treinos ativos</th><th></th></tr>
               </thead>
-              <tbody id="grupo-tabela"></tbody>
+              <tbody id="prof-alunos-tabela"></tbody>
             </table>
           </div>
+          <p id="prof-alunos-vazio" class="vazio" hidden>Nenhum aluno encontrado.</p>
         </section>
 
-        <!-- 1) Criar treino (modelo reutilizável) -->
-        <section class="bloco">
-          <h3><span class="num">1</span> Criar treino</h3>
+        <!-- Painel de treinos do aluno: o JS move para baixo da linha clicada -->
+        <section class="detalhe-painel" id="prof-detalhe" hidden>
+          <div class="lista-head">
+            <h3 id="prof-detalhe-nome"></h3>
+            <button type="button" id="prof-detalhe-fechar" class="link">Fechar</button>
+          </div>
 
-          <div id="treino-sucesso" class="banner banner-ok" role="status" hidden></div>
+          <div id="prof-detalhe-msg" class="banner banner-ok" role="status" hidden></div>
+
+          <div class="tabela-wrap">
+            <table>
+              <thead>
+                <tr><th>Treino</th><th>Exercícios</th><th>Atribuído em</th><th>Status</th><th></th></tr>
+              </thead>
+              <tbody id="prof-atrib-tabela"></tbody>
+            </table>
+          </div>
+          <p id="prof-atrib-vazio" class="vazio" hidden>Nenhum treino atribuído a este aluno.</p>
+
+          <form id="form-prof-atribuir" class="atribuir" novalidate>
+            <label for="prof-atrib-treino">Atribuir treino</label>
+            <div class="linha">
+              <select id="prof-atrib-treino"></select>
+              <button type="submit" class="btn btn-inline">Atribuir</button>
+            </div>
+            <p id="prof-atrib-nota" class="nota" hidden></p>
+          </form>
+        </section>
+      </div>
+
+      <!-- ===== Professor: Treinos (criar / editar — US9) ===== -->
+      <div class="view" id="view-prof-treinos" hidden>
+        <header class="page-head page-head-acao">
+          <div>
+            <h1>Treinos</h1>
+            <p>Monte fichas reutilizáveis. Para entregar ao aluno, use a aba Alunos.</p>
+          </div>
+          <button type="button" id="btn-novo-treino" class="btn btn-inline">+ Novo treino</button>
+        </header>
+
+        <div id="treino-sucesso" class="banner banner-ok" role="status" hidden></div>
+
+        <section class="bloco" id="treino-editor" hidden>
+          <div class="lista-head">
+            <h3 id="treino-titulo">Novo treino</h3>
+            <button type="button" class="link" id="treino-fechar">Cancelar</button>
+          </div>
+
+          <div id="treino-editando" class="banner banner-aviso" hidden></div>
           <div id="treino-erro" class="banner banner-erro" role="alert" hidden></div>
 
           <form id="form-treino" novalidate>
@@ -280,85 +500,122 @@
               <input type="text" id="treino-nome" placeholder="Treino A - Peito e Tríceps" autocomplete="off">
             </div>
 
-            <div class="tabela-wrap ficha">
-              <table>
-                <thead>
-                  <tr><th>Exercício</th><th>Grupo</th><th>Séries x repetições</th><th></th></tr>
-                </thead>
-                <tbody id="treino-itens"></tbody>
-              </table>
-            </div>
-            <p id="treino-vazio" class="vazio">Clique em "Adicionar" nos exercícios acima para montar o treino.</p>
+            <div class="montagem">
+              <div class="painel">
+                <div class="painel-head">
+                  <strong>Banco de exercícios</strong>
+                </div>
+                <div class="filtros">
+                  <input type="search" id="picker-busca" placeholder="Buscar..." aria-label="Buscar exercício">
+                  <select id="picker-grupo" class="js-grupos" aria-label="Grupo muscular"></select>
+                </div>
+                <ul class="picker" id="picker-lista"></ul>
+              </div>
 
-            <div class="campo campo-forma">
+              <div class="painel">
+                <div class="painel-head">
+                  <strong>Ficha do treino</strong>
+                  <span id="ficha-contagem" class="contagem"></span>
+                </div>
+                <ol class="ficha-lista" id="treino-itens"></ol>
+                <p id="treino-vazio" class="vazio">Adicione exercícios pelo banco ao lado.</p>
+              </div>
+            </div>
+
+            <div class="campo campo-forma" id="campo-treino-aluno">
               <label for="treino-aluno">Atribuir a um aluno agora (opcional)</label>
-              <select id="treino-aluno">
-                <option value="">Não atribuir agora</option>
-              </select>
+              <select id="treino-aluno"></select>
             </div>
 
-            <button type="submit" class="btn btn-treino">Criar treino</button>
+            <button type="submit" class="btn btn-treino" id="treino-salvar">Criar treino</button>
           </form>
         </section>
 
-        <!-- 2) Atribuir treino a um aluno -->
-        <section class="bloco">
-          <h3><span class="num">2</span> Atribuir treino ao aluno</h3>
+        <div class="treinos-grid" id="treinos-lista"></div>
+        <p id="treinos-vazio" class="vazio" hidden>Nenhum treino criado ainda. Clique em "+ Novo treino".</p>
+      </div>
 
-          <div id="atrib-sucesso" class="banner banner-ok" role="status" hidden></div>
-          <div id="atrib-erro" class="banner banner-erro" role="alert" hidden></div>
+      <!-- ===== Professor: Exercícios (US3 consulta, US7 cadastro) ===== -->
+      <div class="view" id="view-prof-exercicios" hidden>
+        <header class="page-head page-head-acao">
+          <div>
+            <h1>Banco de exercícios</h1>
+            <p>Consulte por grupo muscular e cadastre novos exercícios para usar nos treinos.</p>
+          </div>
+          <button type="button" id="btn-novo-exercicio" class="btn btn-inline">+ Cadastrar exercício</button>
+        </header>
 
-          <form id="form-atribuir" novalidate>
+        <div id="ex-sucesso" class="banner banner-ok" role="status" hidden></div>
+
+        <section class="bloco painel-form" id="ex-form-bloco" hidden>
+          <div class="lista-head">
+            <h3>Cadastrar exercício</h3>
+            <button type="button" class="link" id="ex-fechar">Cancelar</button>
+          </div>
+
+          <div id="ex-erro" class="banner banner-erro" role="alert" hidden></div>
+
+          <form id="form-exercicio" novalidate>
             <div class="grid">
               <div class="campo">
-                <label for="atrib-treino">Treino</label>
-                <select id="atrib-treino">
-                  <option value="">Selecione o treino...</option>
-                </select>
+                <label for="ex-nome">Nome do exercício</label>
+                <input type="text" id="ex-nome" placeholder="Stiff" autocomplete="off">
               </div>
               <div class="campo">
-                <label for="atrib-aluno">Aluno</label>
-                <select id="atrib-aluno">
-                  <option value="">Selecione o aluno...</option>
-                </select>
+                <label for="ex-grupo">Grupo muscular</label>
+                <select id="ex-grupo" class="js-grupos" data-vazio="Selecione..."></select>
+              </div>
+              <div class="campo">
+                <label for="ex-equip">Equipamento (opcional)</label>
+                <input type="text" id="ex-equip" placeholder="Barra" autocomplete="off">
+              </div>
+              <div class="campo">
+                <label for="ex-sugestao">Sugestão de séries (opcional)</label>
+                <input type="text" id="ex-sugestao" placeholder="3 x 12" autocomplete="off">
               </div>
             </div>
-            <button type="submit" class="btn btn-treino">Atribuir treino</button>
+            <button type="submit" class="btn btn-treino">Cadastrar exercício</button>
           </form>
         </section>
 
         <section class="bloco">
           <div class="lista-head">
-            <h3>Treinos criados</h3>
+            <h3>Exercícios</h3>
+            <span id="grupo-contagem" class="contagem"></span>
+          </div>
+          <div class="filtros">
+            <input type="search" id="ex-busca" placeholder="Buscar exercício" aria-label="Buscar exercício">
+            <select id="grupo" class="js-grupos" aria-label="Grupo muscular"></select>
           </div>
           <div class="tabela-wrap">
             <table>
               <thead>
-                <tr><th>Treino</th><th>Exercícios</th><th>Criado em</th></tr>
+                <tr><th>Exercício</th><th>Grupo</th><th>Equipamento</th><th>Sugestão</th><th>Origem</th></tr>
               </thead>
-              <tbody id="treinos-tabela"></tbody>
+              <tbody id="grupo-tabela"></tbody>
             </table>
           </div>
-          <p id="treinos-vazio" class="vazio">Nenhum treino criado ainda.</p>
-        </section>
-
-        <section class="bloco">
-          <div class="lista-head">
-            <h3>Treinos atribuídos</h3>
-          </div>
-          <div class="tabela-wrap">
-            <table>
-              <thead>
-                <tr><th>Aluno</th><th>Treino</th><th>Atribuído em</th></tr>
-              </thead>
-              <tbody id="atribuidos-tabela"></tbody>
-            </table>
-          </div>
-          <p id="atribuidos-vazio" class="vazio">Nenhum treino atribuído ainda.</p>
+          <p id="ex-vazio" class="vazio" hidden>Nenhum exercício encontrado.</p>
         </section>
       </div>
     </main>
   </div>
+
+  <!-- Modal de confirmação (substitui o confirm() do navegador) -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-caixa" role="alertdialog" aria-modal="true" aria-labelledby="modal-titulo" aria-describedby="modal-texto">
+      <span class="modal-ico" aria-hidden="true">!</span>
+      <h2 id="modal-titulo"></h2>
+      <p id="modal-texto"></p>
+      <div class="modal-acoes">
+        <button type="button" class="btn-sec" id="modal-cancelar">Cancelar</button>
+        <button type="button" class="btn-perigo" id="modal-ok">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificações rápidas -->
+  <div class="toasts" id="toasts" aria-live="polite"></div>
 
   <script src="script.js"></script>
 </body>
